@@ -45,6 +45,10 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $e)
     {
+        if (get_class($e) == "Illuminate\Session\TokenMismatchException") {
+            return redirect()->back()->withErrors('CSRF token expired. Please try again');
+        }
+
         return parent::render($request, $e);
     }
 }

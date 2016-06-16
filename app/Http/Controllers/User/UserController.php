@@ -10,4 +10,14 @@ class UserController extends BaseController
     {
         return view('user.index');
     }
+
+    public function postIndex()
+    {
+        return view('user.index');
+    }
+
+    public function getRegister()
+    {
+        return view('user.register');
+    }
 }

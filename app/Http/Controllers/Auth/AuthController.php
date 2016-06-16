@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Auth;
 use App\User;
 use Validator;
 use App\Http\Controllers\Controller;
+use Auth;
+use Session;
+use Google2FA;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 
@@ -37,7 +41,50 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware($this->guestMiddleware(), ['except' => 'logout']);
+        $this->middleware($this->guestMiddleware(), ['except' => ['logout', 'getLogout', 'postAuthenticate', 'getTotp', 'postTotp']]);
+    }
+
+    public function postAuthenticate()
+    {
+        if (Auth::attempt(['email' => Input::get('email'), 'password' => Input::get('password')])) {
+            if (empty(Auth::user()->totp_secret)) {
+                return redirect('/auth/totp');
+            } else {
+                if (!Google2FA::verifyKey(Auth::user()->totp_secret, Input::get('totp'))) {
+                    Auth::logout();
+                    Session::set('2fasecret', false);
+                    return redirect('/auth/login')->withErrors('Wrong One-Time password');
+                } else {
+                    return redirect('/')->with('success', 'Successfully logged in!');
+                }
+            }
+        }
+    }
+
+    public function getTotp()
+    {
+        if (Auth::check()) {
+            if (empty(Auth::user()->totp_secret)) {
+                Session::set('2fasecret', Google2FA::generateSecretKey());
+                return view('auth.totp', ['secret' => Session::get('2fasecret')]);
+            } else {
+                return redirect('/');
+            }
+        } else {
+            return redirect('/');
+        }
+    }
+
+    public function postTotp()
+    {
+        if (!Google2FA::verifyKey(Session::get('2fasecret'), Input::get('totp'))) {
+            return redirect()->back()->withErrors('Wrong One-Time password');
+        } else {
+            Auth::user()->totp_secret = Session::get('2fasecret');
+            Auth::user()->save();
+            Session::set('2fasecret', false);
+            return redirect('/')->with('success', 'Successfully configured!');
+        }
     }
 
     /**
@@ -68,5 +115,11 @@ class AuthController extends Controller
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
+    }
+
+    public function getLogout()
+    {
+        Auth::logout();
+        return redirect('/');
     }
 }

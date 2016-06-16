@@ -11,5 +11,14 @@
 |
 */
 
+Route::controllers([
+    'auth' => 'Auth\AuthController',
+    'password' => 'Auth\PasswordController',
+]);
+
 Route::controller('/user', 'User\UserController');
 Route::controller('/', 'Site\SiteController');
+
+Route::auth();
+
+Route::get('/home', 'HomeController@index');
