@@ -1,27 +1,64 @@
-# Laravel PHP Framework
+# Midas
 
-[![Build Status](https://travis-ci.org/laravel/framework.svg)](https://travis-ci.org/laravel/framework)
-[![Total Downloads](https://poser.pugx.org/laravel/framework/d/total.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Stable Version](https://poser.pugx.org/laravel/framework/v/stable.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Unstable Version](https://poser.pugx.org/laravel/framework/v/unstable.svg)](https://packagist.org/packages/laravel/framework)
-[![License](https://poser.pugx.org/laravel/framework/license.svg)](https://packagist.org/packages/laravel/framework)
+Существует потребность в обмене. Совершать p2p обмен - может быть небезопасно.
+Биржа выступает в роли гаранта, который позволяет совершить безопасный обмен между участниками.
+С каждой операции на бирже мы будем планируем получать 0.25% ~ 0.1%
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as authentication, routing, sessions, queueing, and caching.
+Примеры бирж
+https://btc-e.com/
+https://www.cryptsy.com/
+https://poloniex.com/exchange#btc_eth
+https://gatecoin.com/marketDepth
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications. A superb inversion of control container, expressive migration system, and tightly integrated unit testing support give you the tools you need to build any application with which you are tasked.
+Обьем торгов на паре BTC
+http://coinmarketcap.com/currencies/bitcoin/#markets
+В среднем обьем за день 20kk$
+Размер рынка небольшой. Имеет большой потенциал роста.
 
-## Official Documentation
+По форкам нам интересны макисимально ликвидные пары: Litecoin, DASH, Ethereum
+(список форков можно посмотреть на этой странице http://coinmarketcap.com/currencies/views/all/)
 
-Documentation for the framework can be found on the [Laravel website](http://laravel.com/docs).
+Ключевые стадии проекта.
+=> написание биржи, тестирование, запуска без фиата (торги по парам DASH/ BTC, LTC/ BTC, ETH/ BTC)
+=> реклама, захват доли рынка, увеличение обьема торгов
+=> поиск решения для ввода/ вывода фиата, открытие пар BTC/ USD, LTC/ USD, ETH/ USD
 
-## Contributing
+TODO [основная часть]
+=> регистрация
+=> авторизация
+=> восстановление/ смена пароля
+=> возможность совершения сделать (купить/ продать)
+=> вывод графика
+=> прием/ вывод btc, ltc, dash, eth (например https://github.com/poiuty/dashpay.org.ru/blob/master/private/cron/pay.php)
+=> график торгов (можно использовать http://www.highcharts.com/)
+=> дизайн сайта (можно применить http://getbootstrap.com/)
+=> api (получение информации*, совершение действий**)
+* => например, получение инфы о сделках на паре, обьеме торгов
+** => например, возможность купить/ продать/ выставить сделку.
+https://www.cryptsy.com/pages/api (тут есть пример api биржи)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](http://laravel.com/docs/contributions).
+Предлагаю делать сайт на php. Под базу взять MySQL.
+В данном случае мы можем легко масштабировать наш сайт.
+Например nginx [proxy, web server] => php1, php2, php3 => mysql(slave1) + mysql(slave2) + ... + mysql(master)
 
-## Security Vulnerabilities
+Структура сайта.
+/private => подключаемые файлы, cron, настройки
+/public => скрипты обработчики, на которые мы отправляем запросы (через js например)
+/pages => страницы сайта (например http://test.dev/pages/settings.php)
+index.php => главня страница
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
+Обработку страницы предлагаю сделать через функции. Например
+<php> include(...) => function(balance){} </php>
+<html> balance: =function(balance)</html>
 
-## License
+То есть вся логика происходит до html кода.
+Далее когда php отработал логику - он формирует html и отдает страницу пользователю.
+Делаем максимально простой код. Без использования php фреймворков типо yui, kohana.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).
+Клиент делает запрос на наш веб сервер, nginx в зависимости от приоритета => отправляет запрос на обработку php.
+http://nginx.org/en/docs/http/load_balancing.html
+На уровне php мы можем использовать несколько mysql серверов. Часть из них (slave) только под select запросы, и один (master) под insert/ update.
+Таким образом когда нам не хватает ресурсов мы добавляем новый сервер => N1 + N2 + ... +NX
+
+Для защиты от ddos - мы используем сервисы фильтрации http трафика, например https://www.cloudflare.com/plans/
+А так же берем серверы в тех ДЦ, которые фильтруют ddos. Например в OVH => https://www.ovh.ie/dedicated_servers/enterprise/
