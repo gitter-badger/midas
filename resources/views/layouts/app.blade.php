@@ -39,6 +39,8 @@
                       </a>
 
                       <ul class="dropdown-menu" role="menu">
+                          <li><a href="{{ url('/auth/totp') }}"><i class="fa fa-btn fa-sign-out"></i>2FA Settings</a></li>
+                          <li class="divider"></li>
                           <li><a href="{{ url('/auth/logout') }}"><i class="fa fa-btn fa-sign-out"></i>Logout</a></li>
                       </ul>
                   </li>
@@ -59,6 +61,11 @@
                 @endforeach
             @endif
         @endif
+
+        @if (Session::has('success'))
+           <div class="alert alert-success">{{ Session::get('success') }}</div>
+        @endif
+
         @yield('content')
     </div>
 

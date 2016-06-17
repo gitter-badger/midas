@@ -38,19 +38,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group{{ $errors->has('totp') ? ' has-error' : '' }}">
-                            <label for="totp" class="col-md-4 control-label">One-Time password (optional)</label>
-
-                            <div class="col-md-6">
-                                <input id="totp" type="text" class="form-control" name="totp">
-
-                                @if ($errors->has('totp'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('totp') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
+                        @include('helpers.totp_confirm', ['optional' => true])
 
                         <div class="form-group">
                             <div class="col-md-6 col-md-offset-4">

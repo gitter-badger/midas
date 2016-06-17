@@ -15,8 +15,8 @@ class Controller extends BaseController
 
     public function __construct()
     {
-        if (Auth::check() && empty(Auth::user()->totp_secret)) {
+        /*if (Auth::check() && empty(Auth::user()->totp_secret)) {
             redirect('/auth/totp')->send();
-        }
+        }*/
     }
 }
