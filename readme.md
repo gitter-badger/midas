@@ -1,5 +1,7 @@
 # Midas
 
+[![Join the chat at https://gitter.im/poiuty/midas](https://badges.gitter.im/poiuty/midas.svg)](https://gitter.im/poiuty/midas?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Существует потребность в обмене. Совершать p2p обмен - может быть небезопасно.
 Биржа выступает в роли гаранта, который позволяет совершить безопасный обмен между участниками.
 С каждой операции на бирже мы будем планируем получать 0.25% ~ 0.1%
