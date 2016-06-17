@@ -92,7 +92,9 @@ class AuthController extends Controller
     {
         if (Totp::verify($request, false)) {
             if (!empty(Input::get('reset'))) {
-                return redirect('/auth/totp')->with('success', 'Successfully reseted!');
+                Auth::user()->set('totp_secret', false);
+                Auth::user()->set('totp_enable', 0);
+                return redirect('/auth/totp')->with('success', 'Secret key removed! Now you can re-enable 2FA with new one.');
             }
             Auth::user()->set('totp_enable', Input::get('totp_enable'));
             return redirect('/auth/totp')->with('success', 'Successfully saved!');
